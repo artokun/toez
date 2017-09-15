@@ -3,6 +3,7 @@ const cookieSession = require('cookie-session')
 const passport = require('passport')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
+const path = require('path')
 const keys = require('./config/keys')
 
 // Initialize App
@@ -25,6 +26,17 @@ require('./models/User')
 // Register API Routes
 app.use('/auth/google', require('./routes/authRouter'))
 app.use('/api', require('./routes/apiRouter'))
+
+// Register Web Routes
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files
+  app.use(express.static('client/build'))
+
+  //Handle remaining routes for SPA
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
+  })
+}
 
 // Connect Database
 mongoose.connect(keys.mongoURI)
